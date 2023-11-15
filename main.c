@@ -11,14 +11,13 @@
 int main(int argc, char *argv[])
 {
 
-	char command[MAX_COMMAND_LENGTH];
 	char *program_name = argv[0];
 	bool interactive_mode;
 	size_t len;
 	char *line = NULL;
 	size_t bufsize = 0;
+	(void) argc;
 
-	(void)argc;
 	interactive_mode = isatty(fileno(stdin));
 	while (true)
 	{
@@ -32,12 +31,12 @@ int main(int argc, char *argv[])
 			printf("\n");
 			break;
 		}
-		len = strlen(command);
-		if (len > 0 && command[len - 1] == '\n')
+		len = strlen(line);
+		if (len > 0 && line[len - 1] == '\n')
 		{
-			command[len - 1] = '\0';
+			line[len - 1] = '\0';
 		}
-		execute_command(command, program_name);
+		execute_command(line, program_name);
 	}
 
 	return (0);
@@ -58,9 +57,9 @@ void execute_command(char *command, char *program_name)
 	}
 	else if (pid == 0)
 	{
-		char *args[2];
-		args[0]	= command;
-		args[1]  = NULL;
+		char *args[3];
+		args[0] = command;
+		args[1] = NULL;
 
 		execvp(command, args);
 		fprintf(stderr, "%s: No such file or directory %s\n", program_name, command);
