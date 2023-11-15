@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
 		}
 		if (getline(&line, &bufsize, stdin) == -1)
 		{
-			printf("\n");
 			break;
 		}
 		len = strlen(line);
