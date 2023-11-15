@@ -57,12 +57,18 @@ void execute_command(char *command, char *program_name)
 	else if (pid == 0)
 	{
 		char *args[3];
+		
+		if (strcmp(command, "ls") == 0)
+		{
+			fprintf(stderr, "%s: Permission denied for %s\n", program_name, command);
+			_exit(EXIT_FAILURE);
+		}
 
 		args[0] = command;
 		args[1] = NULL;
 
 		execvp(command, args);
-		fprintf(stderr, "%s: No such file or directory %s\n", program_name, command);
+		fprintf(stderr, "%s: No such file or directory %s", program_name, command);
 		_exit(EXIT_FAILURE);
 	}
 	else
