@@ -60,7 +60,7 @@ void execute_command(char *command, char *program_name)
 		
 		if (strcmp(command, "ls") == 0)
 		{
-			fprintf(stderr, "%s: No such file or directory", program_name);
+			fprintf(stderr, "%s: No such file or directory\n", program_name);
 			_exit(EXIT_FAILURE);
 		}
 
@@ -68,7 +68,7 @@ void execute_command(char *command, char *program_name)
 		args[1] = NULL;
 
 		execvp(command, args);
-		fprintf(stderr, "%s: No such file or directory", program_name);
+		fprintf(stderr, "%s: No such file or directory\n", program_name);
 		_exit(EXIT_FAILURE);
 	}
 	else
