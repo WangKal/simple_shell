@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 	char *program_name = argv[0];
 	bool interactive_mode;
 	size_t len;
+	char *line = NULL;
+	size_t bufsize = 0;
 
 	(void)argc;
 	interactive_mode = isatty(fileno(stdin));
@@ -25,7 +27,7 @@ int main(int argc, char *argv[])
 			printf("$ : ");
 			fflush(stdout);
 		}
-		if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL)
+		if (getline(&line, &bufsize, stdin) == -1)
 		{
 			printf("\n");
 			break;
