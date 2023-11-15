@@ -63,7 +63,7 @@ void execute_command(char *command, char *program_name)
 		args[1]  = NULL;
 
 		execvp(command, args);
-		fprintf(stderr, "%s: command not found: %s\n", program_name, command);
+		fprintf(stderr, "%s: No such file or directory %s\n", program_name, command);
 		_exit(EXIT_FAILURE);
 	}
 	else
