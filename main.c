@@ -3,7 +3,7 @@
 
 /**
  * main - entry point
- * @arg: arg count
+ * @argc: arg count
  * @argv: arg vector
  *
  * Return: 0 on success, 1 on error
@@ -39,7 +39,11 @@ int main(int argc, char *argv[])
 	return (0);
 }
 
-
+/**
+ * execute_command - Execute a command given by the user.
+ * @command: The command to execute.
+ * @program_name: The name of the program (argv[0]).
+ */
 void execute_command(char *command, char *program_name)
 {
 	pid_t pid = fork();
