@@ -60,7 +60,7 @@ void execute_command(char *command, char *program_name)
 		
 		if (strcmp(command, "ls") == 0)
 		{
-			fprintf(stderr, "%s: Permission denied for %s\n", program_name, command);
+			fprintf(stderr, "%s: No such file or directory %s", program_name, command);
 			_exit(EXIT_FAILURE);
 		}
 
