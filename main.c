@@ -58,6 +58,7 @@ void execute_command(char *command, char *program_name)
 	else if (pid == 0)
 	{
 		char *args[3];
+
 		args[0] = command;
 		args[1] = NULL;
 
