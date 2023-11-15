@@ -10,11 +10,13 @@
  */
 int main(int argc, char *argv[])
 {
+
 	char command[MAX_COMMAND_LENGTH];
 	char *program_name = argv[0];
 	bool interactive_mode;
 	size_t len;
 
+	(void)argc;
 	interactive_mode = isatty(fileno(stdin));
 	while (true)
 	{
@@ -54,7 +56,9 @@ void execute_command(char *command, char *program_name)
 	}
 	else if (pid == 0)
 	{
-		char *args[] = {command, NULL};
+		char *args[2];
+		args[0]	= command;
+		args[1]  = NULL;
 
 		execvp(command, args);
 		fprintf(stderr, "%s: command not found: %s\n", program_name, command);
