@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	{
 		if (interactive_mode)
 		{
-			printf("$ : ");
+			fprintf(stderr, "$%s : ", program_name);
 			fflush(stdout);
 		}
 		if (getline(&line, &bufsize, stdin) == -1)
