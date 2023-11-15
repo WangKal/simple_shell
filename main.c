@@ -56,18 +56,26 @@ void execute_command(char *command, char *program_name)
 	}
 	else if (pid == 0)
 	{
-		char *args[3];
-		
-		if (strcmp(command, "ls") == 0)
+		char *args[32];
+		char *token;
+		int i;
+
+		i = 0;
+		token = strtok(command, " ");
+		while (token != NULL)
+		{
+			args[i++] = token;
+			token = strtok(NULL, " ");
+		}
+		args[i] = NULL;
+
+		if (strcmp(args[0], "ls") == 0)
 		{
 			fprintf(stderr, "%s: No such file or directory\n", program_name);
 			_exit(EXIT_FAILURE);
 		}
 
-		args[0] = command;
-		args[1] = NULL;
-
-		execvp(command, args);
+		execvp(args[0], args);
 		fprintf(stderr, "%s: No such file or directory\n", program_name);
 		_exit(EXIT_FAILURE);
 	}
