@@ -69,14 +69,8 @@ void execute_command(char *command, char *program_name)
 		}
 		args[i] = NULL;
 
-		if (strcmp(args[0], "ls") == 0)
-		{
-			fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
-			_exit(EXIT_FAILURE);
-		}
-
 		execvp(args[0], args);
-		fprintf(stderr, "%s: No such file or directory\n", program_name);
+		fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
 		_exit(EXIT_FAILURE);
 	}
 	else
