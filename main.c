@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	{
 		if (interactive_mode)
 		{
-			fprintf(stderr, "$%s : ", program_name);
+			printf("$ ");
 			fflush(stdout);
 		}
 		if (getline(&line, &bufsize, stdin) == -1)
@@ -71,7 +71,7 @@ void execute_command(char *command, char *program_name)
 
 		if (strcmp(args[0], "ls") == 0)
 		{
-			fprintf(stderr, "%s: No such file or directory\n", program_name);
+			fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
 			_exit(EXIT_FAILURE);
 		}
 
