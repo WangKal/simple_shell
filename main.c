@@ -66,6 +66,8 @@ void execute_command(char *command, char *program_name)
 		token = strtok(command, " ");
 		while (token != NULL)
 		{
+			if (strlen(token) > 0)
+			{
 			args = realloc(args, (i + 1) * sizeof(char *));
 			if (args == NULL)
 			{
@@ -77,6 +79,7 @@ void execute_command(char *command, char *program_name)
 				exit(EXIT_FAILURE);
 			}
 			i++;
+			}
 			token = strtok(NULL, " ");
 		}
 		args = realloc(args, (i + 1) * sizeof(char *));
