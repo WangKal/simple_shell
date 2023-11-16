@@ -60,6 +60,7 @@ void execute_command(char *command, char *program_name)
 		char **args = NULL;
 		char *token;
 		int i;
+		int x;
 
 		i = 0;
 		token = strtok(command, " ");
@@ -78,10 +79,21 @@ void execute_command(char *command, char *program_name)
 			i++;
 			token = strtok(NULL, " ");
 		}
+		args = realloc(args, (i + 1) * sizeof(char *));
+		if (args == NULL)
+		{
+			exit(EXIT_FAILURE);
+		}
 		args[i] = NULL;
 
 		execvp(args[0], args);
 		fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
+
+		for (x = 0; x < i; x++)
+		{
+			free(args[x]);
+		}
+		free(args);
 		_exit(EXIT_FAILURE);
 	}
 	else
