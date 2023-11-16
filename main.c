@@ -36,9 +36,9 @@ int main(int argc, char *argv[])
 			line[len - 1] = '\0';
 		}
 		execute_command(line, program_name);
-		free(line);
-	}
 
+	}
+	free(line);
 	return (0);
 }
 
@@ -80,5 +80,4 @@ void execute_command(char *command, char *program_name)
 
 		waitpid(pid, &status, 0);
 	}
-	free(command);
 }
