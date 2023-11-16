@@ -8,7 +8,10 @@
  *
  * Return: 0 on success, 1 on error
  */
+#define MAX_COMMAND_LENGTH 100
+#define MAX_PATH_LENGTH 100
 int is_whitespace(char c);
+char *get_full_path(char *command);
 
 int main(int argc, char *argv[])
 {
@@ -75,6 +78,12 @@ int is_whitespace(char c)
 void execute_command(char *command, char *program_name)
 {
 	pid_t pid;
+	char *full_path = get_full_path(command);
+	if (full_path == NULL)
+	{
+		fprintf(stderr, "%s: command not found: %s\n", program_name, command);
+		return;
+	}
 
 	if (strspn(command, " \t\n\r") == strlen(command))
                  {
@@ -135,4 +144,29 @@ void execute_command(char *command, char *program_name)
 		int status;
 		waitpid(pid, &status, 0);
 	}
+}
+char *get_full_path(char *command)
+{
+	char *path_dirs[MAX_PATH_LENGTH];
+	char full_path[MAX_PATH_LENGTH + MAX_COMMAND_LENGTH];
+	int i;
+	
+	int dir_count = 0;
+	char *path = getenv("PATH");
+	char *token = strtok(path, ":");
+	while (token != NULL && dir_count < MAX_PATH_LENGTH - 1)
+	{
+		path_dirs[dir_count++] = token;
+		token = strtok(NULL, ":");
+	}
+	path_dirs[dir_count] = NULL;
+	for (i = 0; i < dir_count; i++)
+	{
+		snprintf(full_path, sizeof(full_path), "%s/%s", path_dirs[i], command);
+		if (access(full_path, X_OK) == 0)
+		{
+			return strdup(full_path);
+		}
+	}
+	return NULL;
 }
