@@ -80,4 +80,5 @@ void execute_command(char *command, char *program_name)
 
 		waitpid(pid, &status, 0);
 	}
+	free(command);
 }
