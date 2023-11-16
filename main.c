@@ -57,7 +57,7 @@ void execute_command(char *command, char *program_name)
 	}
 	else if (pid == 0)
 	{
-		char *args[32];
+		char *args[232];
 		char *token;
 		int i;
 
