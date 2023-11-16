@@ -57,7 +57,7 @@ void execute_command(char *command, char *program_name)
 	}
 	else if (pid == 0)
 	{
-		char *args[232];
+		char **args = NULL;
 		char *token;
 		int i;
 
@@ -65,7 +65,17 @@ void execute_command(char *command, char *program_name)
 		token = strtok(command, " ");
 		while (token != NULL)
 		{
-			args[i++] = token;
+			args = realloc(args, (i + 1) * sizeof(char *));
+			if (args == NULL)
+			{
+				exit(EXIT_FAILURE);
+			}
+			args[i] = strdup(token);
+			if (args[i] == NULL)
+			{
+				exit(EXIT_FAILURE);
+			}
+			i++;
 			token = strtok(NULL, " ");
 		}
 		args[i] = NULL;
