@@ -8,12 +8,15 @@
  *
  * Return: 0 on success, 1 on error
  */
+int is_whitespace(char c);
+
 int main(int argc, char *argv[])
 {
-
 	char *program_name = argv[0];
 	bool interactive_mode;
 	size_t len;
+	int is_empty_or_whitespace = 1;
+	size_t i;
 	char *line = NULL;
 	size_t bufsize = 0;
 	(void) argc;
@@ -35,11 +38,33 @@ int main(int argc, char *argv[])
 		{
 			line[len - 1] = '\0';
 		}
+		for (i = 0; i < len; i++)
+		{
+			if (!is_whitespace(line[i]))
+			{
+				is_empty_or_whitespace = 0;
+				break;
+			}
+		}
+		if (is_empty_or_whitespace)
+		{
+			free(line);
+			continue;
+		}
+		if (strspn(line, " \t\n\r") == len)
+		{
+			free(line);
+			continue;
+		}
 		execute_command(line, program_name);
 
 	}
 	free(line);
 	return (0);
+}
+int is_whitespace(char c)
+{
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
 /**
@@ -49,7 +74,14 @@ int main(int argc, char *argv[])
  */
 void execute_command(char *command, char *program_name)
 {
-	pid_t pid = fork();
+	pid_t pid;
+
+	if (strspn(command, " \t\n\r") == strlen(command))
+                 {
+	
+                         return;
+                 }
+	pid = fork();
 
 	if (pid < 0)
 	{
@@ -61,6 +93,7 @@ void execute_command(char *command, char *program_name)
 		char *token;
 		int i;
 		int x;
+		(void) program_name;
 
 		i = 0;
 		token = strtok(command, " ");
@@ -90,8 +123,6 @@ void execute_command(char *command, char *program_name)
 		args[i] = NULL;
 
 		execvp(args[0], args);
-		fprintf(stderr, "%s: 1: %s: not found\n", program_name, args[0]);
-
 		for (x = 0; x < i; x++)
 		{
 			free(args[x]);
@@ -102,7 +133,6 @@ void execute_command(char *command, char *program_name)
 	else
 	{
 		int status;
-
 		waitpid(pid, &status, 0);
 	}
 }
