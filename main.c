@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
 			line[len - 1] = '\0';
 		}
 		execute_command(line, program_name);
+		free(line);
 	}
 
 	return (0);
