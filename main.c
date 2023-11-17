@@ -56,6 +56,11 @@ int main(int argc, char *argv[])
 			free(line);
 			continue;
 		}
+		if (strcmp(line, "exit") == 0)
+		{
+			break;
+		}
+
 		execute_command(line, program_name);
 
 	}
