@@ -8,11 +8,10 @@
  *
  * Return: 0 on success, 1 on error
  */
-#define BUFFER_SIZE 1024
-
 int is_whitespace(char c);
 void print_environment(void);
-char *my_getline(void);
+void set_environment_variable(char *variable, char *value);
+void unset_environment_variable(char *variable);
 int main(int argc, char *argv[])
 {
 	char *program_name = argv[0];
@@ -21,6 +20,7 @@ int main(int argc, char *argv[])
 	int is_empty_or_whitespace = 1;
 	size_t i;
 	char *line = NULL;
+	size_t bufsize = 0;
 	(void) argc;
 
 	interactive_mode = isatty(fileno(stdin));
@@ -31,8 +31,7 @@ int main(int argc, char *argv[])
 			printf("$ ");
 			fflush(stdout);
 		}
-		line = my_getline();
-		if (line == NULL)
+		if (getline(&line, &bufsize, stdin) == -1)
 		{
 			break;
 		}
@@ -84,8 +83,17 @@ int is_whitespace(char c)
 void execute_command(char *command, char *program_name)
 {
 	int exit_status;
+	char *variable;
+	char *value;
 	char *status_str;
+	char *comment_pos;
 	pid_t pid;
+	
+	comment_pos = strchr(command, '#');
+	if (comment_pos != NULL)
+	{
+		*comment_pos = '\0';
+	}
 
 	if (strspn(command, " \t\n\r") == strlen(command))
                  {
@@ -102,7 +110,26 @@ void execute_command(char *command, char *program_name)
 			}
 			free(command);
 			exit(exit_status);
-                }	
+                }
+		if (strncmp(command, "setenv", 6) == 0)
+		{
+			variable = strtok(command + 6, " \t\n\r");
+			value = strtok(NULL, " \t\n\r");
+			if (variable != NULL && value != NULL)
+			{
+				set_environment_variable(variable, value);
+			}
+			return;
+		}
+		if (strncmp(command, "unsetenv", 8) == 0)
+		{
+			variable = strtok(command + 8, " \t\n\r");
+		       	if (variable != NULL)
+			{
+				unset_environment_variable(variable);
+			}
+			return;
+		}
 	pid = fork();
 
 	if (pid < 0)
@@ -185,41 +212,18 @@ void print_environment(void)
 		printf("%s\n", *env);
 	}
 }
-char *my_getline(void)
+void set_environment_variable(char *variable, char *value)
 {
-	static char buffer[BUFFER_SIZE];
-	static size_t buffer_index = 0;
-	static ssize_t buffer_size = 0;
-	char *line = NULL;
-	size_t line_size = 0;
-	
-	while (1)
+	if (setenv(variable, value, 1) != 0)
 	{
-		if (buffer_index >= (size_t)buffer_size || buffer_size < 0)
-		{
-			buffer_size = read(STDIN_FILENO, buffer, BUFFER_SIZE);
-			if (buffer_size <= 0)
-			{
-			       	if (line_size > 0)
-				{
-					return line;
-				}
-				return NULL;
-			}
-			buffer_index = 0;
-		}
-		if (buffer[buffer_index] == '\n')
-		{
-			buffer[buffer_index] = '\0';
-			buffer_index++;
-			break;
-		}
-		line = realloc(line, line_size + 1 + 1);
-		line[line_size] = buffer[buffer_index];
-		line_size++;
-		buffer_index++;
+		perror("setenv");
 	}
-	line = realloc(line, line_size + 1);
-	line[line_size] = '\0';
-	return line;
+}
+
+void unset_environment_variable(char *variable)
+{
+	if (unsetenv(variable) != 0)
+	{
+		perror("unsetenv");
+	}
 }
