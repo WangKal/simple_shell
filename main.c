@@ -8,10 +8,7 @@
  *
  * Return: 0 on success, 1 on error
  */
-#define MAX_COMMAND_LENGTH 100
-#define MAX_PATH_LENGTH 100
 int is_whitespace(char c);
-char *get_full_path(char *command);
 
 int main(int argc, char *argv[])
 {
@@ -77,104 +74,65 @@ int is_whitespace(char c)
  */
 void execute_command(char *command, char *program_name)
 {
-	char **args = NULL;
-	char *token;
-	char *full_path;
-	int i;
-	int x;
 	pid_t pid;
-	int status;
-	(void)program_name;
-    
-	i = 0;
-	token = strtok(command, " ");
-	while (token != NULL)
-	{
-		if (strlen(token) > 0)
-		{
-			args = realloc(args, (i + 1) * sizeof(char *));
-			if (args == NULL)
-			{
-				perror("realloc");
-				exit(EXIT_FAILURE);
-			}
-			args[i] = strdup(token);
-			if (args[i] == NULL)
-			{
-				perror("strdup");
-				exit(EXIT_FAILURE);
-			}
-			i++;
-		}
-		token = strtok(NULL, " ");
-	}
-	args = realloc(args, (i + 1) * sizeof(char *));
-	if (args == NULL)
-	{
-		perror("realloc");
-		exit(EXIT_FAILURE);
-	}
-	args[i] = NULL;
-	if (i == 0)
-	{
-		free(args);
-		return;
-	}
-	full_path = get_full_path(args[0]);
-	if (full_path == NULL)
-	{
-		fprintf(stderr, "%s: command not found: %s\n", program_name, args[0]);
-		for (x = 0; x < i; x++)
-		{
-			free(args[x]);
-		}
-		free(args);
-		return;
-	}
+
+	if (strspn(command, " \t\n\r") == strlen(command))
+                 {
+	
+                         return;
+                 }
 	pid = fork();
+
 	if (pid < 0)
 	{
 		perror("fork");
 	}
 	else if (pid == 0)
 	{
-		execvp(full_path, args);
-	       	perror("execvp");
+		char **args = NULL;
+		char *token;
+		int i;
+		int x;
+		(void) program_name;
+
+		i = 0;
+		token = strtok(command, " ");
+		while (token != NULL)
+		{
+			if (strlen(token) > 0)
+			{
+			args = realloc(args, (i + 1) * sizeof(char *));
+			if (args == NULL)
+			{
+				exit(EXIT_FAILURE);
+			}
+			args[i] = strdup(token);
+			if (args[i] == NULL)
+			{
+				exit(EXIT_FAILURE);
+			}
+			i++;
+			}
+			token = strtok(NULL, " ");
+		}
+		args = realloc(args, (i + 1) * sizeof(char *));
+		if (args == NULL)
+		{
+			exit(EXIT_FAILURE);
+		}
+		args[i] = NULL;
+
+		execvp(args[0], args);
+		for (x = 0; x < i; x++)
+		{
+			free(args[x]);
+		}
+		free(args);
 		_exit(EXIT_FAILURE);
 	}
 	else
 	{
+		int status;
 		waitpid(pid, &status, 0);
 	}
-	free(full_path);
-	for (x = 0; x < i; x++)
-	{
-		free(args[x]);
-	}
-	free(args);
-}
-char *get_full_path(char *command)
-{
-	char *path_dirs[MAX_PATH_LENGTH];
-	char full_path[MAX_PATH_LENGTH + MAX_COMMAND_LENGTH];
-	int i;
-	
-	int dir_count = 0;
-	char *path = getenv("PATH");
-	char *token = strtok(path, ":");
-	while (token != NULL && dir_count < MAX_PATH_LENGTH - 1)
-	{
-		path_dirs[dir_count++] = token;
-		token = strtok(NULL, ":");
-	}
-	path_dirs[dir_count] = NULL;
-	for (i = 0; i < dir_count; i++)
-	{
-		snprintf(full_path, sizeof(full_path), "%s/%s", path_dirs[i], command);
-		if (access(full_path, X_OK) == 0)
-		{
-			return strdup(full_path);
-		}
-	}
-	return NULL;
 }
