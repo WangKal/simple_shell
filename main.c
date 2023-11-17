@@ -8,8 +8,11 @@
  *
  * Return: 0 on success, 1 on error
  */
+#define BUFFER_SIZE 1024
+
 int is_whitespace(char c);
 void print_environment(void);
+char *my_getline(void);
 int main(int argc, char *argv[])
 {
 	char *program_name = argv[0];
@@ -18,7 +21,6 @@ int main(int argc, char *argv[])
 	int is_empty_or_whitespace = 1;
 	size_t i;
 	char *line = NULL;
-	size_t bufsize = 0;
 	(void) argc;
 
 	interactive_mode = isatty(fileno(stdin));
@@ -29,7 +31,8 @@ int main(int argc, char *argv[])
 			printf("$ ");
 			fflush(stdout);
 		}
-		if (getline(&line, &bufsize, stdin) == -1)
+		line = my_getline();
+		if (line == NULL)
 		{
 			break;
 		}
@@ -181,4 +184,42 @@ void print_environment(void)
 	{
 		printf("%s\n", *env);
 	}
+}
+char *my_getline(void)
+{
+	static char buffer[BUFFER_SIZE];
+	static size_t buffer_index = 0;
+	static ssize_t buffer_size = 0;
+	char *line = NULL;
+	size_t line_size = 0;
+	
+	while (1)
+	{
+		if (buffer_index >= (size_t)buffer_size || buffer_size < 0)
+		{
+			buffer_size = read(STDIN_FILENO, buffer, BUFFER_SIZE);
+			if (buffer_size <= 0)
+			{
+			       	if (line_size > 0)
+				{
+					return line;
+				}
+				return NULL;
+			}
+			buffer_index = 0;
+		}
+		if (buffer[buffer_index] == '\n')
+		{
+			buffer[buffer_index] = '\0';
+			buffer_index++;
+			break;
+		}
+		line = realloc(line, line_size + 1 + 1);
+		line[line_size] = buffer[buffer_index];
+		line_size++;
+		buffer_index++;
+	}
+	line = realloc(line, line_size + 1);
+	line[line_size] = '\0';
+	return line;
 }
