@@ -77,73 +77,81 @@ int is_whitespace(char c)
  */
 void execute_command(char *command, char *program_name)
 {
+	char **args = NULL;
+	char *token;
+	char *full_path;
+	int i;
+	int x;
 	pid_t pid;
-	char *full_path = get_full_path(command);
-	if (full_path == NULL)
+	int status;
+	(void)program_name;
+    
+	i = 0;
+	token = strtok(command, " ");
+	while (token != NULL)
 	{
-		fprintf(stderr, "%s: command not found: %s\n", program_name, command);
+		if (strlen(token) > 0)
+		{
+			args = realloc(args, (i + 1) * sizeof(char *));
+			if (args == NULL)
+			{
+				perror("realloc");
+				exit(EXIT_FAILURE);
+			}
+			args[i] = strdup(token);
+			if (args[i] == NULL)
+			{
+				perror("strdup");
+				exit(EXIT_FAILURE);
+			}
+			i++;
+		}
+		token = strtok(NULL, " ");
+	}
+	args = realloc(args, (i + 1) * sizeof(char *));
+	if (args == NULL)
+	{
+		perror("realloc");
+		exit(EXIT_FAILURE);
+	}
+	args[i] = NULL;
+	if (i == 0)
+	{
+		free(args);
 		return;
 	}
-
-	if (strspn(command, " \t\n\r") == strlen(command))
-                 {
-	
-                         return;
-                 }
+	full_path = get_full_path(args[0]);
+	if (full_path == NULL)
+	{
+		fprintf(stderr, "%s: command not found: %s\n", program_name, args[0]);
+		for (x = 0; x < i; x++)
+		{
+			free(args[x]);
+		}
+		free(args);
+		return;
+	}
 	pid = fork();
-
 	if (pid < 0)
 	{
 		perror("fork");
 	}
 	else if (pid == 0)
 	{
-		char **args = NULL;
-		char *token;
-		int i;
-		int x;
-		(void) program_name;
-
-		i = 0;
-		token = strtok(command, " ");
-		while (token != NULL)
-		{
-			if (strlen(token) > 0)
-			{
-			args = realloc(args, (i + 1) * sizeof(char *));
-			if (args == NULL)
-			{
-				exit(EXIT_FAILURE);
-			}
-			args[i] = strdup(token);
-			if (args[i] == NULL)
-			{
-				exit(EXIT_FAILURE);
-			}
-			i++;
-			}
-			token = strtok(NULL, " ");
-		}
-		args = realloc(args, (i + 1) * sizeof(char *));
-		if (args == NULL)
-		{
-			exit(EXIT_FAILURE);
-		}
-		args[i] = NULL;
-
-		execvp(args[0], args);
-		for (x = 0; x < i; x++)
-		{
-			free(args[x]);
-		}
-		free(args);
+		execvp(full_path, args);
+	       	perror("execvp");
 		_exit(EXIT_FAILURE);
 	}
 	else
 	{
-		int status;
 		waitpid(pid, &status, 0);
 	}
+	free(full_path);
+	for (x = 0; x < i; x++)
+	{
+		free(args[x]);
+	}
+	free(args);
 }
 char *get_full_path(char *command)
 {
