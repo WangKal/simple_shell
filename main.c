@@ -9,7 +9,7 @@
  * Return: 0 on success, 1 on error
  */
 int is_whitespace(char c);
-
+void print_environment(void);
 int main(int argc, char *argv[])
 {
 	char *program_name = argv[0];
@@ -56,9 +56,10 @@ int main(int argc, char *argv[])
 			free(line);
 			continue;
 		}
-		if (strcmp(line, "exit") == 0)
+		if (strcmp(line, "env") == 0)
 		{
-			break;
+			print_environment();
+			continue;
 		}
 
 		execute_command(line, program_name);
@@ -79,6 +80,8 @@ int is_whitespace(char c)
  */
 void execute_command(char *command, char *program_name)
 {
+	int exit_status;
+	char *status_str;
 	pid_t pid;
 
 	if (strspn(command, " \t\n\r") == strlen(command))
@@ -86,6 +89,17 @@ void execute_command(char *command, char *program_name)
 	
                          return;
                  }
+                if (strncmp(command, "exit", 4) == 0)
+                {
+      			exit_status = 0;
+			status_str = strtok(command + 4, " \t\n\r");
+			if (status_str != NULL)
+			{
+				exit_status = atoi(status_str);
+			}
+			free(command);
+			exit(exit_status);
+                }	
 	pid = fork();
 
 	if (pid < 0)
@@ -128,16 +142,43 @@ void execute_command(char *command, char *program_name)
 		args[i] = NULL;
 
 		execvp(args[0], args);
+		perror("execvp");
+		_exit(2);
+
 		for (x = 0; x < i; x++)
 		{
 			free(args[x]);
 		}
 		free(args);
-		_exit(EXIT_FAILURE);
+		_exit(2);
 	}
 	else
 	{
 		int status;
 		waitpid(pid, &status, 0);
+		if (WIFEXITED(status))
+		{
+			if (WEXITSTATUS(status) == 127)
+			{
+				status = 2;
+			}
+			else
+			{
+				status = WEXITSTATUS(status);
+			}
+		}
+		else
+		{
+			status = 1;
+		}
+	}
+}
+void print_environment(void)
+{
+	extern char **environ;
+	char **env;
+	for (env = environ; *env != NULL; env++)
+	{
+		printf("%s\n", *env);
 	}
 }
