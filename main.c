@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 }
 int is_whitespace(char c)
 {
-	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
 }
 
 /**
@@ -88,29 +88,27 @@ void execute_command(char *command, char *program_name)
 	char *status_str;
 	char *comment_pos;
 	pid_t pid;
-	
+
 	comment_pos = strchr(command, '#');
 	if (comment_pos != NULL)
 	{
 		*comment_pos = '\0';
 	}
-
 	if (strspn(command, " \t\n\r") == strlen(command))
-                 {
-	
-                         return;
-                 }
-                if (strncmp(command, "exit", 4) == 0)
-                {
-      			exit_status = 0;
-			status_str = strtok(command + 4, " \t\n\r");
-			if (status_str != NULL)
-			{
-				exit_status = atoi(status_str);
-			}
+	{
+		return;
+	}
+	if (strncmp(command, "exit", 4) == 0)
+	{
+		exit_status = 0;
+		status_str = strtok(command + 4, " \t\n\r");
+		if (status_str != NULL)
+		{
+			exit_status = atoi(status_str);
+		}
 			free(command);
 			exit(exit_status);
-                }
+	}
 		if (strncmp(command, "setenv", 6) == 0)
 		{
 			variable = strtok(command + 6, " \t\n\r");
@@ -124,7 +122,7 @@ void execute_command(char *command, char *program_name)
 		if (strncmp(command, "unsetenv", 8) == 0)
 		{
 			variable = strtok(command + 8, " \t\n\r");
-		       	if (variable != NULL)
+			if (variable != NULL)
 			{
 				unset_environment_variable(variable);
 			}
@@ -185,6 +183,7 @@ void execute_command(char *command, char *program_name)
 	else
 	{
 		int status;
+
 		waitpid(pid, &status, 0);
 		if (WIFEXITED(status))
 		{
@@ -207,6 +206,7 @@ void print_environment(void)
 {
 	extern char **environ;
 	char **env;
+
 	for (env = environ; *env != NULL; env++)
 	{
 		printf("%s\n", *env);
